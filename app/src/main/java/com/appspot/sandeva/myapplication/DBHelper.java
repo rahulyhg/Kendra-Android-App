@@ -10,9 +10,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
+import android.location.LocationManager;
+import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
 
+    Context context;
     public static final String DATABASE_NAME = "MyDBName.db";
     public static final String TABLE_NAME = "event";
     public static final String ID = "id";
@@ -25,6 +29,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
+        this.context = context;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private Event getEventFromCursor(Cursor res) {
-        Event e = new Event(res.getInt(res.getColumnIndex(ID)),
+        Event e = new Event(context, res.getInt(res.getColumnIndex(ID)),
                 res.getString(res.getColumnIndex(NAME)));
         e.values.put(Consts.Key.GMT, res.getDouble(res.getColumnIndex(GMT)));
         e.values.put(Consts.Key.Timezone, res.getDouble(res.getColumnIndex(TIMEZONE)));
@@ -97,8 +102,10 @@ public class DBHelper extends SQLiteOpenHelper {
         int id;
         public String name;
         public Map<Consts.Key, Double> values;
+        Context context;
 
-        public Event(int id, String name) {
+        public Event(Context context, int id, String name) {
+            this.context = context;
             this.id = id;
             this.name = name;
             values = new HashMap<Consts.Key, Double>();
@@ -106,8 +113,24 @@ public class DBHelper extends SQLiteOpenHelper {
             Calendar date = Calendar.getInstance();
             values.put(Consts.Key.GMT, (double) date.getTimeInMillis() - date.getTimeZone().getRawOffset());
             values.put(Consts.Key.Timezone, (double) date.getTimeZone().getRawOffset() / 1000);
-            values.put(Consts.Key.latitude, .0);
-            values.put(Consts.Key.longitude, .0);
+            // Coordinates of Colombo, Sri Lanka
+            values.put(Consts.Key.latitude, 6.9344 * 3600);
+            values.put(Consts.Key.longitude, 79.8428 * 3600);
+
+            LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+            Location loc = null;
+
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            else if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (loc!=null) {
+                values.put(Consts.Key.latitude, loc.getLatitude() * 3600);
+                values.put(Consts.Key.longitude, loc.getLongitude() * 3600);
+                Log.d("LOACTION=====", loc.toString());
+            }
+
             Calculator.GetKendraNirayana(values);
 
         }

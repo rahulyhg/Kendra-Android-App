@@ -1,6 +1,5 @@
 package com.appspot.sandeva.myapplication;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -8,10 +7,8 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,7 +18,6 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.support.v4.app.FragmentActivity;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -64,6 +60,7 @@ public class MainActivity extends FragmentActivity {
         setDefaultFont(this, "SANS_SERIF", "fonts/iskpota.ttf");
         Log.d("============", "onCreate");
 
+        // TODO location search feature
         Geocoder geocoder = new Geocoder(this);
         List<Address> addresses;
         try {
@@ -92,7 +89,7 @@ public class MainActivity extends FragmentActivity {
         res.updateConfiguration(conf, res.getDisplayMetrics());
 
 
-        event = new DBHelper.Event(0, "තත්කාල කේන්ද්\u200Dරය");
+        event = new DBHelper.Event(this, 0, "තත්කාල කේන්ද්\u200Dරය");
 
         setContentView(R.layout.planets);
 
@@ -100,32 +97,7 @@ public class MainActivity extends FragmentActivity {
         Typeface face=Typeface.createFromAsset(getAssets(), "fonts/iskpota.ttf");
         tv.setTypeface(face);
 
-        // TODO location search feature
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        LocationListener locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                if (event.id > 0) return;
-                event.values.put(Consts.Key.latitude, location.getLatitude() * 3600);
-                event.values.put(Consts.Key.longitude, location.getLongitude() * 3600);
-                Log.d("LOACTION=====", location.toString());
-                Calculator.GetKendraNirayana(event.values);
-                // findViewById(R.id.table).invalidate();
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            public void onProviderEnabled(String provider) {
-            }
-
-            public void onProviderDisabled(String provider) {
-            }
-        };
-
-        if (locationManager.getAllProviders().indexOf(LocationManager.GPS_PROVIDER) >= 0) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        }
     }
 
     @Override
