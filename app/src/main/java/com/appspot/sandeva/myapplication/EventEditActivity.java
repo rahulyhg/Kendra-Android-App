@@ -63,11 +63,12 @@ public class EventEditActivity extends Activity {
         makeSgn(lg_s, lg_d, lg_m, 180, new String[]{"නැ", "බ"});
 
         Calendar c = Calendar.getInstance();
-        Map<Consts.Key, Double> values = MainActivity.event.values;
+
+        Map<Consts.Key, Double> values = MainActivity.activity.event.values;
         Log.d(values.get(Consts.Key.GMT).toString(), values.get(Consts.Key.Timezone).toString());
         c.setTimeInMillis((long)(values.get(Consts.Key.GMT) + 1000 * values.get(Consts.Key.Timezone)));
 
-        name.setText(MainActivity.event.name);
+        name.setText(MainActivity.activity.event.name);
         dp.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         tp.setCurrentHour(c.get(Calendar.HOUR_OF_DAY));
         tp.setCurrentMinute(c.get(Calendar.MINUTE));
@@ -78,7 +79,7 @@ public class EventEditActivity extends Activity {
     }
 
     private void readColumn(NumberPicker s, NumberPicker d, NumberPicker m, Consts.Key key) {
-        int val = MainActivity.event.values.get(key).intValue();
+        int val = MainActivity.activity.event.values.get(key).intValue();
         s.setValue(val > 0 ? 0 : 1);
         d.setValue(Math.abs(val) / 3600);
         m.setValue(Math.abs(val) / 60 % 60);
@@ -103,7 +104,7 @@ public class EventEditActivity extends Activity {
                 builder.setMessage(R.string.deleteContact)
                         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                mydb.deleteContact(MainActivity.event.id);
+                                mydb.deleteContact(MainActivity.activity.event.id);
                                 Toast.makeText(getApplicationContext(), "Deleted Successfully", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 startActivity(intent);
@@ -128,14 +129,14 @@ public class EventEditActivity extends Activity {
     public void run(View view) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(dp.getYear(), dp.getMonth(), dp.getDayOfMonth(), tp.getCurrentHour(), tp.getCurrentMinute());
-        MainActivity.event.name = name.getText().toString();
+        MainActivity.activity.event.name = name.getText().toString();
         double tz = getVal(tz_s, tz_h, tz_m);
-        Map<Consts.Key, Double> values = MainActivity.event.values;
+        Map<Consts.Key, Double> values = MainActivity.activity.event.values;
         values.put(Consts.Key.GMT, (double) calendar.getTimeInMillis() - tz * 1000);
         values.put(Consts.Key.Timezone, tz);
         values.put(Consts.Key.latitude, getVal(lt_s, lt_d, lt_m));
         values.put(Consts.Key.longitude, getVal(lg_s, lg_d, lg_m));
-        MainActivity.event.save(mydb);
+        MainActivity.activity.event.save(mydb);
         Toast.makeText(getApplicationContext(), "done", Toast.LENGTH_SHORT).show();
         finish();
     }
